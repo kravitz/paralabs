@@ -1,10 +1,18 @@
-.PHONY: clean
+.PHONY: all clean
 
-INCLUDES=-I. -I/usr/include/nptl
-CFLAGS=-std=c99 -D_REENTERANT $(INCLUDES)
-LDFLAGS=-L/usr/lib/nptl -lpthread
+all: task_01 task_02 task_03 task_04
+
+task_01: task_01.c
+	gcc -pthread task_01.c -o task_01
+
+task_02: task_02.c
+	gcc -pthread task_02.c -o task_02
+
+task_03: task_03.c
+	gcc -pthread task_03.c -o task_03
+
+task_04: task_04.c
+	gcc -fopenmp -lgomp -ggdb task_04.c -o task_04
+
 clean:
-	rm -f t01 t02 t03
-
-t%: t@.c
-
+	rm -f *.o task_01 task_02 task_03 task_04
