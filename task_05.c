@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <sys/time.h>
 #include "quicksort.h"
 #include "ctest.h"
 
@@ -49,6 +51,7 @@ int main()
     }
     END_TEST;
 
+    struct timeval timev1,timev2;
     BEGIN_TEST("Sorting long random sequence")
     {
         size_t length = 1e6;
@@ -58,11 +61,15 @@ int main()
         {
             array[i] = rand();
         }
+        gettimeofday(&timev1,NULL);
         quicksort(array, length, sizeof(int), int_comparator);
+        gettimeofday(&timev2,NULL);
         CHECK(is_ordered(array, length, sizeof(int), int_comparator));
         free(array);
     }
     END_TEST;
+    float time_seconds = timev2.tv_sec-timev1.tv_sec+0.000001*(timev2.tv_usec-timev1.tv_usec);
+    printf("Time of sorting in this test: %.4f \n", time_seconds);
 
     SUMMARIZE
 

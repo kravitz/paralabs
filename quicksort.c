@@ -37,6 +37,7 @@ void quicksort(void *base, size_t num, size_t size, comparator_t comparator)
 {
     if (num > 0)
     {
+        swap(at(base, size, num - 1), at(base, size, rand() % num), size); // Randomize
         int q = partition(base, num, size, comparator);
         quicksort(base, q, size, comparator);
         quicksort(at(base, size, q + 1), num - q - 1, size, comparator); 

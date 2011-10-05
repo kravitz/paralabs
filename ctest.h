@@ -4,7 +4,7 @@
 #include <setjmp.h>
 
 #define BEGIN_TEST(title) do { jmp_buf ex_buf__; \
-    printf("%s ... ", (title)); \
+    printf("%-70s", (title " ")); \
     if (!setjmp(ex_buf__)) {
 #define END_TEST printf("%s\n", "PASSED"); ++passed;} else {printf("%s\n", "FAILED"); ++failed;} } while(0)
 #define CHECK(cond) if (!(cond)) longjmp(ex_buf__, 1);
