@@ -1,6 +1,8 @@
 #include <string.h>
 #include "mergesort.h"
+#include "quicksort.h"
 #include "generic_sequence.h"
+#define K 17
 
 // ... | base1 ... l1 elements | base2 ... l2_elements | ...
 void merge(void *base1, void *base2, size_t l1, size_t l2, size_t el_size, comparator_t comparator)
@@ -29,13 +31,19 @@ void merge(void *base1, void *base2, size_t l1, size_t l2, size_t el_size, compa
 
 void mergesort(void *base, size_t length, size_t el_size, comparator_t comparator)
 {
-    if (length > 1)
+    if (length > K)
     {
         size_t q = length >> 1, l2 = length - q;
-        void *base2 = at(base, el_size, q + 1);
-        mergesort(base, q, el_size, comparator);
-        mergesort(base2, l2, el_size, comparator);
+        void *base2 = at(base, el_size, q);
+        #pragma omp parallel sections
+        {
+            #pragma omp section
+            mergesort(base, q, el_size, comparator);
+            #pragma omp section
+            mergesort(base2, l2, el_size, comparator);
+        }
         merge(base, base2, q, l2, el_size, comparator);
     }
-
+    else
+        quicksort(base, length, el_size, comparator);
 }
