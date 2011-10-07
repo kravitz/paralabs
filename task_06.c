@@ -3,10 +3,9 @@
 #include <time.h>
 #include <sys/time.h>
 #include <omp.h>
-#include "quicksort.h"
-#include "generic_sequence.h"
 #include "ctest.h"
-
+#include "mergesort.h"
+#include "generic_sequence.h"
 #define LENGTH_AND_SIZE(A) LENGTH(A), sizeof(A[0])
 
 int main()
@@ -21,10 +20,10 @@ int main()
     }
     END_TEST;
 
-    BEGIN_TEST("Basic quicksort")
+    BEGIN_TEST("Basic mergesort")
     {
         int array[] = {3,2,1};
-        quicksort(array, LENGTH_AND_SIZE(array), int_comparator);
+        mergesort(array, LENGTH_AND_SIZE(array), int_comparator);
         CHECK(is_ordered(array, LENGTH_AND_SIZE(array), int_comparator));
     }
     END_TEST;
@@ -33,37 +32,13 @@ int main()
     {
         int array[] = {1,2,3,4,5,6,7,8,9};
         CHECK(is_ordered(array, LENGTH_AND_SIZE(array), int_comparator));
-        quicksort(array, LENGTH_AND_SIZE(array), int_comparator);
+        mergesort(array, LENGTH_AND_SIZE(array), int_comparator);
         CHECK(is_ordered(array, LENGTH_AND_SIZE(array), int_comparator));
     }
     END_TEST;
 
     struct timeval timev1,timev2;
     float time_seconds;
-    for(int num_threads = 1; num_threads < 8; num_threads++)
-    {
-        char title[256];
-        sprintf(title, "Sorting long random sequence with %d threads", num_threads);
-        omp_set_num_threads(num_threads);
-        BEGIN_TEST(title)
-        {
-            size_t length = 1e7;
-            int *array = (int *)malloc(length * sizeof(int));
-            CHECK(array != NULL);
-            for(size_t i = 0; i < length; ++i)
-            {
-                array[i] = rand();
-            }
-            gettimeofday(&timev1,NULL);
-            quicksort(array, length, sizeof(int), int_comparator);
-            gettimeofday(&timev2,NULL);
-            CHECK(is_ordered(array, length, sizeof(int), int_comparator));
-            free(array);
-        }
-        END_TEST;
-        time_seconds = timev2.tv_sec-timev1.tv_sec+0.000001*(timev2.tv_usec-timev1.tv_usec);
-        printf("Time of sorting in this test: %.4f \n", time_seconds);
-    }
 
     BEGIN_TEST("Sorting reversed sequence")
     {
@@ -75,15 +50,12 @@ int main()
             array[i] = length - i;
         }
         gettimeofday(&timev1,NULL);
-        quicksort(array, length, sizeof(int), int_comparator);
+        mergesort(array, length, sizeof(int), int_comparator);
         gettimeofday(&timev2,NULL);
         CHECK(is_ordered(array, length, sizeof(int), int_comparator));
         free(array);
     }
     END_TEST;
-    time_seconds = timev2.tv_sec-timev1.tv_sec+0.000001*(timev2.tv_usec-timev1.tv_usec);
-    printf("Time of sorting in this test: %.4f \n", time_seconds);
-    SUMMARIZE
-
+    SUMMARIZE;
     return 0;
 }

@@ -2,6 +2,7 @@
 #define _CTEST_H_
 
 #include <setjmp.h>
+#include <stdio.h>
 
 #define BEGIN_TEST(title) { jmp_buf ex_buf__; \
     printf("%-70s", title); \
