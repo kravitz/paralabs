@@ -7,15 +7,9 @@ void merge(void *base1, void *base2, size_t l1, size_t l2, size_t el_size, compa
 {
     void *L = (void *)malloc(l1 * el_size),
          *R = (void *)malloc(l2 * el_size);
-    for (int i = 0; i < l1; ++i)
-    {
-        memcpy(at(L, el_size, i), at(base1, el_size, i), el_size);
-    }
+    memcpy(L, base1, el_size * l1);
+    memcpy(R, base2, el_size * l2);
 
-    for (int i = 0; i < l2; ++i)
-    {
-        memcpy(at(R, el_size, i), at(base2, el_size, i), el_size);
-    }
     int i = 0, j = 0;
     for (int k = 0; k < l1 + l2; ++k)
     {
@@ -28,6 +22,7 @@ void merge(void *base1, void *base2, size_t l1, size_t l2, size_t el_size, compa
             memcpy(at(base1, el_size, k), at(R, el_size, j++), el_size);
         }
     }
+
     free(L);
     free(R);
 }
