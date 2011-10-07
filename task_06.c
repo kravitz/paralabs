@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include <sys/time.h>
 #include <omp.h>
 #include "ctest.h"
@@ -56,6 +57,69 @@ int main()
         free(array);
     }
     END_TEST;
+    time_seconds = timev2.tv_sec-timev1.tv_sec+0.000001*(timev2.tv_usec-timev1.tv_usec);
+    printf("Time of sorting in this test: %.4f \n", time_seconds);
+
+    size_t length = 1e7;
+    size_t array_byte_size = length * sizeof(int);
+    int *original_array = (int *)malloc(array_byte_size),
+        *sorted_array = (int *)malloc(array_byte_size);
+    for(int i = 0; i < length; ++i) original_array[i] = rand(); 
+    char title[256];
+    for(int num_threads = 1; num_threads < 8; num_threads++)
+    {
+        sprintf(title, "Sorting long random sequence with %d threads", num_threads);
+        omp_set_num_threads(num_threads);
+        BEGIN_TEST(title)
+        {
+            memcpy(sorted_array, original_array, array_byte_size);
+            gettimeofday(&timev1,NULL);
+            mergesort(sorted_array, length, sizeof(int), int_comparator);
+            gettimeofday(&timev2,NULL);
+            CHECK(is_ordered(sorted_array, length, sizeof(int), int_comparator));
+        }
+        END_TEST;
+        time_seconds = timev2.tv_sec-timev1.tv_sec+0.000001*(timev2.tv_usec-timev1.tv_usec);
+        printf("Time of sorting in this test: %.4f \n", time_seconds);
+    }
+    /*
+    printf("Determine good thread count and K");
+    struct mark {
+        float time;
+        int K;
+    };
+    struct mark mink[10];
+
+    for(int num_threads = 1; num_threads < 10; num_threads++)
+    {
+        float mintime = 1e9; // should be enough :)
+        for(int k = 2; k < 50; ++k)
+        {
+            memcpy(sorted_array, original_array, array_byte_size);
+            setK(k);
+            gettimeofday(&timev1,NULL);
+            mergesort(sorted_array, length, sizeof(int), int_comparator);
+            gettimeofday(&timev2,NULL);
+            time_seconds = timev2.tv_sec-timev1.tv_sec+0.000001*(timev2.tv_usec-timev1.tv_usec);
+            if (time_seconds < mintime)
+            {
+                mintime = time_seconds;
+                mink[num_threads].time = mintime;
+                mink[num_threads].K = k;
+            }
+            printf("k = %d, %d threads: %.4f \n", k, num_threads, time_seconds);
+        }
+    }
+    printf("Measure finished, results:\n");
+    for(int i = 1; i < 10; ++i)
+    {
+        printf("Threads %d, K: %d, time: %.4f\n", i, mink[i].K, mink[i].time);
+    }
+    */
+    free(sorted_array);
+    free(original_array);
+
     SUMMARIZE;
+
     return 0;
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include <sys/time.h>
 #include <omp.h>
 #include "quicksort.h"
@@ -40,34 +41,37 @@ int main()
 
     struct timeval timev1,timev2;
     float time_seconds;
-    for(int num_threads = 1; num_threads < 8; num_threads++)
+
     {
+        size_t length = 1e7;
+        size_t array_byte_size = length * sizeof(int);
+        int *original_array = (int *)malloc(array_byte_size),
+            *sorted_array = (int *)malloc(array_byte_size);
+        for(int i = 0; i < length; ++i) original_array[i] = rand(); 
         char title[256];
-        sprintf(title, "Sorting long random sequence with %d threads", num_threads);
-        omp_set_num_threads(num_threads);
-        BEGIN_TEST(title)
+        for(int num_threads = 1; num_threads < 8; num_threads++)
         {
-            size_t length = 1e7;
-            int *array = (int *)malloc(length * sizeof(int));
-            CHECK(array != NULL);
-            for(size_t i = 0; i < length; ++i)
+            sprintf(title, "Sorting long random sequence with %d threads", num_threads);
+            omp_set_num_threads(num_threads);
+            BEGIN_TEST(title)
             {
-                array[i] = rand();
+                memcpy(sorted_array, original_array, array_byte_size);
+                gettimeofday(&timev1,NULL);
+                quicksort(sorted_array, length, sizeof(int), int_comparator);
+                gettimeofday(&timev2,NULL);
+                CHECK(is_ordered(sorted_array, length, sizeof(int), int_comparator));
             }
-            gettimeofday(&timev1,NULL);
-            quicksort(array, length, sizeof(int), int_comparator);
-            gettimeofday(&timev2,NULL);
-            CHECK(is_ordered(array, length, sizeof(int), int_comparator));
-            free(array);
+            END_TEST;
+            time_seconds = timev2.tv_sec-timev1.tv_sec+0.000001*(timev2.tv_usec-timev1.tv_usec);
+            printf("Time of sorting in this test: %.4f \n", time_seconds);
         }
-        END_TEST;
-        time_seconds = timev2.tv_sec-timev1.tv_sec+0.000001*(timev2.tv_usec-timev1.tv_usec);
-        printf("Time of sorting in this test: %.4f \n", time_seconds);
+        free(sorted_array);
+        free(original_array);
     }
 
     BEGIN_TEST("Sorting reversed sequence")
     {
-        size_t length = 1e6;
+        size_t length = 1e3;
         int *array = (int *)malloc(length * sizeof(int));
         CHECK(array != NULL);
         for(size_t i = 0; i < length; ++i)

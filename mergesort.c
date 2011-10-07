@@ -2,7 +2,13 @@
 #include "mergesort.h"
 #include "quicksort.h"
 #include "generic_sequence.h"
-#define K 17
+
+int K = 29;
+
+void setK(int newK)
+{
+    K = newK;
+}
 
 // ... | base1 ... l1 elements | base2 ... l2_elements | ...
 void merge(void *base1, void *base2, size_t l1, size_t l2, size_t el_size, comparator_t comparator)
