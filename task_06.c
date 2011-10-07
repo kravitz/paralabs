@@ -60,7 +60,7 @@ int main()
     time_seconds = timev2.tv_sec-timev1.tv_sec+0.000001*(timev2.tv_usec-timev1.tv_usec);
     printf("Time of sorting in this test: %.4f \n", time_seconds);
 
-    size_t length = 1e7;
+    size_t length = 5e6;
     size_t array_byte_size = length * sizeof(int);
     int *original_array = (int *)malloc(array_byte_size),
         *sorted_array = (int *)malloc(array_byte_size);

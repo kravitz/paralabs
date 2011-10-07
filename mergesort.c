@@ -35,21 +35,40 @@ void merge(void *base1, void *base2, size_t l1, size_t l2, size_t el_size, compa
     free(R);
 }
 
+/* funny variant of mergesort, turned upside-down */
+// coffee and insomnia (tm)
 void mergesort(void *base, size_t length, size_t el_size, comparator_t comparator)
 {
-    if (length > K)
+    int div = K;
+    void *b1, *b2;
+    #pragma omp parallel for
+    for (int i = 0; i < length / div; ++i)
     {
-        size_t q = length >> 1, l2 = length - q;
-        void *base2 = at(base, el_size, q);
-        #pragma omp parallel sections
-        {
-            #pragma omp section
-            mergesort(base, q, el_size, comparator);
-            #pragma omp section
-            mergesort(base2, l2, el_size, comparator);
-        }
-        merge(base, base2, q, l2, el_size, comparator);
+        quicksort(at(base, el_size, i * div), div, el_size, comparator);
     }
-    else
-        quicksort(base, length, el_size, comparator);
+    if (length % div)
+    {
+        quicksort(at(base, el_size, (length / div) * div), length % div, el_size, comparator);
+    }
+    // now repeat merge phase
+    while(1)
+    {
+        size_t intervals_count = (length / div);
+        size_t pairs_count = intervals_count / 2;
+        if (intervals_count < 2 && !(intervals_count == 1 && (length % div))) break;
+        #pragma omp parallel for private(b1, b2)
+        for (int j = 0; j < pairs_count; ++j)
+        {
+            b1 = at(base, el_size, (2*j) * div);
+            b2 = at(base, el_size, (2*j + 1) * div); 
+            merge(b1, b2, div, div, el_size, comparator);
+        }
+        if (intervals_count % 2 && length % div)
+        {
+            b1 = at(base, el_size, (intervals_count - 1) * div);
+            b2 = at(base, el_size, intervals_count * div);
+            merge(b1, b2, div, length % div, el_size, comparator);
+        }
+        div *= 2;
+    }
 }
