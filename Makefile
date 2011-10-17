@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-all: task_01 task_02 task_03 task_04 task_05 task_06 task_07
+all: task_01 task_02 task_03 task_04 task_05 task_06 task_07 task_07_worker
 
 task_01: task_01.c
 	gcc -pthread task_01.c -o task_01
@@ -21,7 +21,10 @@ task_06: task_06.c mergesort.c mergesort.h ctest.h generic_sequence.c generic_se
 	gcc -std=c99 -fopenmp -g task_06.c mergesort.c quicksort.c generic_sequence.c -o task_06
 
 task_07: task_07.c
-	mpicc task_07.c -o task_07
+	mpicc -std=c99 -lm task_07.c -o task_07
+
+task_07_worker: task_07_worker.c
+	mpicc -std=c99 task_07_worker.c -o task_07_worker 
 
 clean:
-	rm -f task_01 task_02 task_03 task_04 task_05 task_06 task_07
+	rm -f task_01 task_02 task_03 task_04 task_05 task_06 task_07 task_07_worker
