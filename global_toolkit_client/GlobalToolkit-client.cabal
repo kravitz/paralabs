@@ -50,6 +50,7 @@ Cabal-version:       >=1.2
 
 
 Executable GlobalToolkit-client
+     GHC-Options: -O3 -rtsopts -threaded
   -- .hs or .lhs file containing the Main module.
      Main-is: global_toolkit_client.hs             
   

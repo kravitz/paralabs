@@ -41,7 +41,7 @@ testPrimality n gen | n < 2 || even n = (False, gen)
 
 testPrimalityR :: RandomGen g => [Integer] -> g -> [Integer]
 testPrimalityR [] g = []
-testPrimalityR (x:xs) g | p = x : (testPrimalityR xs g')
+testPrimalityR (x:xs) g | p = x : testPrimalityR xs g'
                         | otherwise = testPrimalityR xs g'
                         where (p, g') = testPrimality x g
     
