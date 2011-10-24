@@ -20,11 +20,11 @@ task_05: task_05.c quicksort.c quicksort.h ctest.h generic_sequence.c generic_se
 task_06: task_06.c mergesort.c mergesort.h ctest.h generic_sequence.c generic_sequence.h
 	gcc -std=c99 -fopenmp -g task_06.c mergesort.c quicksort.c generic_sequence.c -o task_06
 
-task_07: task_07.c
-	mpicc -std=c99 -lm task_07.c -o task_07
+task_07: task_07.c matrix.h matrix.c messages.h
+	mpicc -std=c99 -g -lm task_07.c matrix.c -o task_07
 
-task_07_worker: task_07_worker.c
-	mpicc -std=c99 task_07_worker.c -o task_07_worker 
+task_07_worker: task_07_worker.c matrix.h matrix.c messages.h
+	mpicc -std=c99 -g task_07_worker.c matrix.c -o task_07_worker 
 
 clean:
 	rm -f task_01 task_02 task_03 task_04 task_05 task_06 task_07 task_07_worker
