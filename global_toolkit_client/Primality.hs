@@ -1,6 +1,7 @@
 module Primality 
 (
   testPrimality,
+  testPrimalityR,
 ) where
 
 import System.Random
@@ -18,8 +19,6 @@ find2km n = f 0 n
 millerRabinPrimality :: RandomGen g => Integer -> Int -> g -> (Bool, g)
 millerRabinPrimality n round gen
     | round == 0          = (True,  gen)
-    | n < 2               = (True, gen)
-    | even n              = (False, gen)
     | b0 `elem` [1, n']   = millerRabinPrimality n (round - 1) gen'
     | otherwise           = iter (tail b)
     where
@@ -27,7 +26,7 @@ millerRabinPrimality n round gen
         (a, gen') = randomR (2, n - 2) gen
         (k, m) = find2km n'
         b0 = powMod n a m
-        b = take (fromIntegral k) $ iterate (squareMod n) b0
+        b = take (fromIntegral $! k) $ iterate (squareMod n) b0
         iter [] = (False, gen')
         iter (x:xs)
             | x == 1 = (False, gen')
@@ -35,7 +34,16 @@ millerRabinPrimality n round gen
             | otherwise = iter xs
 
 testPrimality :: RandomGen g => Integer -> g -> (Bool, g)
-testPrimality n = millerRabinPrimality n (floor . logBase 2 . fromInteger $ n)
+testPrimality 1 gen = (True, gen)
+testPrimality 2 gen = (True, gen)
+testPrimality n gen | n < 2 || even n = (False, gen)
+	            | otherwise = millerRabinPrimality n (floor . logBase 2 . fromInteger $ n) gen
+
+testPrimalityR :: RandomGen g => [Integer] -> g -> [Integer]
+testPrimalityR [] g = []
+testPrimalityR (x:xs) g | p = x : (testPrimalityR xs g')
+                        | otherwise = testPrimalityR xs g'
+                        where (p, g') = testPrimality x g
     
 mulMod :: Integral a => a -> a -> a -> a
 mulMod a b c = (b * c) `mod` a
@@ -53,7 +61,7 @@ pow' mul sq x' n' = f x' n' 1
             | r == 0 = f x2 q y
             | otherwise = f x2 q (x `mul` y)
             where
-                (q,r) = quotRem n 2
+                (q, r) = quotRem n 2
                 x2 = sq x
 
 -- (eq. to) powMod m n k = n^k `mod` m
