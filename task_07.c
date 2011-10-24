@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
     // reassign split values, if matrices are too small
     M = MIN(M, MIN(n, q));
     K = MIN(K, MIN(m, n));
-    printf("%d %d \n", M, K);
     size_t bsize_A = sizeof(double) * m * n, bsize_B = sizeof(double) * m * n;
     double *A = malloc(bsize_A);
     double *B = malloc(bsize_B);
