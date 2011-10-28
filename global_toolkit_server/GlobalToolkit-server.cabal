@@ -52,7 +52,8 @@ Executable GlobalToolkit-server
   
   -- Packages needed in order to build this package.
      Build-depends: base >=4,
-                    network
+                    network,
+                    stm
   
   -- Modules not exported by this package.
   -- Other-modules:       

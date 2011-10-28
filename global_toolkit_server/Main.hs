@@ -1,10 +1,11 @@
 module Main where
+import Prelude hiding (catch)
 import Network (listenOn, accept, sClose, Socket, withSocketsDo, PortID(..))
 import System.IO
 import System.Environment (getArgs)
 import Control.Exception  (finally, catch)
-import Control.Concurent
-import Control.Concurent.STM
+import Control.Concurrent
+import Control.Concurrent.STM
 import Control.Monad (forM, filterM, liftM, when)
 -- code stolen from
 -- http://sequence.complete.org/node/258
@@ -20,7 +21,7 @@ start servSock = do
 clientLoop :: Handle -> TChan String -> IO ()
 clientLoop handle chan =
     listenLoop (hGetLine handle) chan
-                    `catch` (const $ return ())
+                    --`catch` (const $ return ())
                     `finally` hClose handle
 
 listenLoop :: IO a -> TChan a -> IO ()
@@ -51,7 +52,7 @@ mainLoop servSock acceptChan clients = do
                             hPutStrLn h line
                             hFlush h
                             return [(ch,h)]
-                         `catch` const (hClose h >> return [])
+                         --`catch` const (hClose h >> return [])
             let dropped = length $ filter null clients'
             when (dropped > 0) $
                 putStrLn ("clients lost: " ++ show dropped)
@@ -63,7 +64,7 @@ tselect = foldl orElse retry . map (\(ch, ty) -> (flip (,) ty) `fmap` readTChan 
 main :: IO ()
 main = withSocketsDo $ do
     [portStr] <- getArgs
-    let port = fromIntegral $ read portStr :: Int
+    let port = fromIntegral $ (read portStr :: Int)
     servSock <- listenOn $ PortNumber port
     putStrLn $ "listening on: " ++ show port
     start servSock `finally` sClose servSock
