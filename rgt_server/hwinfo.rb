@@ -83,7 +83,7 @@ if host =~ /mingw/
     end
 
     def GetMemInfo
-        memstat = GetMemoryStatusEx
+        memstat = GlobalMemoryStatusEx()
         {total: BtoMB(memstat.totalPhys), free:BtoMB(memstat.availPhys)}
     end
 

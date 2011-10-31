@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 require 'socket'
-require './protocol'
+require_relative 'protocol'
 require 'json'
 require 'pp'
 
@@ -78,7 +78,14 @@ class PrimalServer
 
 end
 
-Thread.abort_on_exception = true
+#Thread.abort_on_exception = true
+
+if ARGV.empty?
+    print "Usage: server.rb host port\n"
+    print "or     server.rb host:port\n"
+    exit 0
+end
+
 
 host, port = ARGV.empty? ? ["localhost:8000"] : ARGV
 host, port = host.split ":" if port.nil?

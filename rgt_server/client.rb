@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 require 'socket'
-require './primes'
-require './protocol'
+require_relative 'primes'
+require_relative 'protocol'
 require 'progressbar'
 require 'json'
-require './hwinfo'
+require_relative 'hwinfo'
 
 if ARGV.empty?
     print "Usage: client.rb host port\n"

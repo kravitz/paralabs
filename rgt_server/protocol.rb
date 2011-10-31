@@ -15,9 +15,7 @@ class MessageHandler
     end
 
     def get
-        m = @socket.gets.chomp
-        print "GET> #{m}\n"
-        m
+        @socket.gets.chomp
     end
 
     def get_with_size
@@ -37,7 +35,6 @@ class MessageHandler
 
     def send(msg)
         @socket.puts msg
-        print "SEND> #{msg}\n"
     end
 end
 
