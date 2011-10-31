@@ -3,11 +3,13 @@
 require 'socket'
 require './protocol'
 require 'json'
+require 'pp'
 
 class PrimalServer
 
     def initialize(host='localhost', port=8000, results_file='results.txt')
         port = port.to_i if port.is_a? String
+        print "Start serving on #{host}:#{port}\n"
         @host = host
         @port = port
         @clients = {}
@@ -50,14 +52,16 @@ class PrimalServer
                     mh.want MSG_HI
                     mh.send MSG_HI
                     mh.send MSG_INFO
-                    @clients[ai_s]["info"] = mh.get
+                    @clients[ai_s]["info"] = JSON mh.get_with_size
                     loop do
                         mh.send MSG_PREPARE
                         mh.want MSG_OK
                         l_bound, r_bound = get_interval
                         @clients[ai_s]["interval"] = (l_bound .. r_bound)
-                        mh.send JSON [l_bound, r_bound]
-                        primes = JSON mh.get
+                        mh.send_with_size JSON [l_bound, r_bound]
+                        mh.want MSG_COMPLETED
+                        mh.send MSG_OK
+                        primes = JSON mh.get_with_size
                         write_results(primes)
                         print "Host #{ai_s} returned #{primes.length} prime numbers\n"
                     end
@@ -75,6 +79,10 @@ class PrimalServer
 end
 
 Thread.abort_on_exception = true
-port = ARGV.grep(/^\d+$/).fetch(0, "8000").to_i
-server = PrimalServer.new(port=port)
+
+host, port = ARGV.empty? ? ["localhost:8000"] : ARGV
+host, port = host.split ":" if port.nil?
+port = port.to_i
+
+server = PrimalServer.new(host=host,port=port)
 server.start

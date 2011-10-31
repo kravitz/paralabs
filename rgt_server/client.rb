@@ -23,11 +23,11 @@ begin
     mh.send MSG_HI
     mh.want MSG_HI
     mh.want MSG_INFO
-    mh.send "lots of cpu"
+    mh.send_with_size (JSON GetHWInfo())
     loop do
         mh.want MSG_PREPARE
         mh.send MSG_OK
-        l_bound, r_bound = JSON mh.get
+        l_bound, r_bound = JSON mh.get_with_size
         nums = (l_bound..r_bound)
         print "Processing block [#{l_bound}..#{r_bound}]...\n"
         pbar = ProgressBar.new("Proccessing", r_bound - l_bound + 1)
@@ -38,7 +38,9 @@ begin
         end
         pbar.finish
         print "#{numsp.length} prime numbers found\n"
-        mh.send (JSON numsp)
+        mh.send MSG_COMPLETED
+        mh.want MSG_OK
+        mh.send_with_size JSON numsp
     end
 ensure
     socket.close

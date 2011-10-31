@@ -1,18 +1,22 @@
+#!/usr/bin/env ruby
 require 'rbconfig'
+#require 'pp'
 
 host = RbConfig::CONFIG["host_os"]
 if host =~ /mingw/
     require 'win32/registry'
     require 'Win32API'
-    cpu_info = {}
-    begin
-        Win32::Registry::HKEY_LOCAL_MACHINE.open('HARDWARE\\DESCRIPTION\\System\\CentralProcessor') do |reg|
+    def GetCPUInfo
+        cpu_info = {}
+        Win32::Registry::HKEY_LOCAL_MACHINE.open(
+                'HARDWARE\\DESCRIPTION\\System\\CentralProcessor') do |reg|
             reg.each_key do |k, v|
                 reg.open(k) do |cpu|
                     cpu_info[k.to_i] = cpu["~MHz"].to_f
                 end
             end
         end
+        cpu_info
     rescue ArgumentError
     end
     GlobalMemoryStatusEx_ = Win32API.new('kernel32', 'GlobalMemoryStatusEx', 'P', 'V')
@@ -53,7 +57,8 @@ if host =~ /mingw/
         bytesPerSector = " " * 4
         numberOfFreeClusters = " " * 4
         totalNumberOfClusters = " " * 4
-        GetDiskFreeSpace_.call(drive_letter, sectorsPerCluster, bytesPerSector, numberOfFreeClusters, totalNumberOfClusters)
+        GetDiskFreeSpace_.call(drive_letter, sectorsPerCluster, bytesPerSector,
+                               numberOfFreeClusters, totalNumberOfClusters)
         sectorsPerCluster = sectorsPerCluster.unpack('L')[0]
         bytesPerSector = bytesPerSector.unpack('L')[0]
         numberOfFreeClusters = numberOfFreeClusters.unpack('L')[0]
@@ -77,11 +82,57 @@ if host =~ /mingw/
         {total: total, free: free}
     end
 
-    disks = GetDisks()
-    disks_info = {}
-    disks.each do |disk|
-        disks_info[disk] = GetDiskInfo(disk)
+    def GetMemInfo
+        memstat = GetMemoryStatusEx
+        {total: BtoMB(memstat.totalPhys), free:BtoMB(memstat.availPhys)}
     end
 
-    p disks_info
+    def GetDisksInfo
+        disks = GetDisks()
+        disks_info = {}
+        disks.each do |disk|
+            disks_info[disk] = GetDiskInfo(disk)
+        end
+        disks_info
+    end
+elsif host =~ /linux/
+    def GetDisksInfo
+        filesystems = (`df -hlP -B 1M`).split("\n").map {|l| l.split(' ') }
+        filesystems.slice!(0, 1)
+        filesystems = filesystems.find_all {|l| l[0] != 'none'}
+        disks_info = {}
+        filesystems.each do |fs|
+            disk = fs[-1]
+            total = fs[1].to_i
+            free = fs[3].to_i
+            disks_info[disk] = {total: total, free: free}
+        end
+        disks_info
+    end
+
+    def GetMemInfo
+        memf = File.new('/proc/meminfo', 'r')
+        total = memf.gets.split(' ')[1].to_i / 1024
+        free = memf.gets.split(' ')[1].to_i / 1024
+        {total: total, free: free}
+    end
+
+    def GetCPUInfo
+        cpu_dirs = Dir.glob('/sys/devices/system/cpu/cpu[0-9]*')
+        freq_suf = '/cpufreq/cpuinfo_max_freq'
+        cpu_info = {}
+        cpu_dirs.each do |cpu_dir|
+            cpu_dir =~ /\/cpu(\d*)$/
+            cpu_n = $1.to_i
+            cpu_info[cpu_n] = File.new(cpu_dir + freq_suf).gets.chomp.to_f / 1000
+        end
+        cpu_info
+    end
 end
+
+def GetHWInfo
+    {cpu: GetCPUInfo(), disk: GetDisksInfo(), memory: GetMemInfo()}
+end
+
+#PP.pp GetHWInfo()
+

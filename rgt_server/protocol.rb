@@ -2,6 +2,7 @@ MSG_HI = 'HI'
 MSG_PREPARE = 'PREPARE'
 MSG_INFO = 'INFO'
 MSG_OK = 'OK'
+MSG_COMPLETED = 'COMPLETED'
 
 class MessageHandler
     def initialize(socket)
@@ -14,15 +15,29 @@ class MessageHandler
     end
 
     def get
-        @socket.gets.chomp
+        m = @socket.gets.chomp
+        print "GET> #{m}\n"
+        m
+    end
+
+    def get_with_size
+        get
+        send MSG_OK
+        m = get
+        send MSG_OK
+        m
+    end
+
+    def send_with_size(msg)
+        send msg.to_s.length
+        want MSG_OK
+        send msg
+        want MSG_OK
     end
 
     def send(msg)
         @socket.puts msg
-    end
-
-    def skip
-        @socket.gets
+        print "SEND> #{msg}\n"
     end
 end
 
