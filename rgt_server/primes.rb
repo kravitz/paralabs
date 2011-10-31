@@ -15,20 +15,22 @@ def powMod(m, n, k)
     loop do 
         q, r = k.divmod 2
         break if (k == 1)
-        y = (x * y).modulo m if r != 0
-        x = (x * x).modulo m
+        y = (x * y) % m if r != 0
+        x = (x * x) % m
         k = q
     end
-    return (x * y).modulo m
+    return (x * y) % m
 end
 
 def test_primality(x)
-    r = Math.log2(x).round
-    return true if x <= 3
-    return false if x.even?
+    return x == 2 if x < 2 || x.even?
+    rndg = Random.new
+	
+	r = Math.log2(x).ceil
+    
     for i in 1..r
         do_next = false
-        a = Random.rand(2..(x-2))
+        a = rndg.rand(2..(x-1))
         k, m = find2km(x - 1)
         x0 = powMod(x, a, m)
         next if x0 == 1 || x0 == (x-1)

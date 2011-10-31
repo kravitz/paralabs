@@ -50,7 +50,7 @@ class PrimalServer
                     mh.want MSG_HI
                     mh.send MSG_HI
                     mh.send MSG_INFO
-                    @clients[ai_s]["info"] = JSON mh.get
+                    @clients[ai_s]["info"] = mh.get
                     loop do
                         mh.send MSG_PREPARE
                         mh.want MSG_OK

@@ -5,6 +5,7 @@ require './primes'
 require './protocol'
 require 'progressbar'
 require 'json'
+require './hwinfo'
 
 if ARGV.empty?
     print "Usage: client.rb host port\n"
@@ -22,6 +23,7 @@ begin
     mh.send MSG_HI
     mh.want MSG_HI
     mh.want MSG_INFO
+    mh.send "lots of cpu"
     loop do
         mh.want MSG_PREPARE
         mh.send MSG_OK
