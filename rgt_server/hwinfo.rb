@@ -101,8 +101,8 @@ if host =~ /mingw/
         disks_info
     end
     def SetLowestPriority
-        proc_hndl = Win32API.new('kernel32','GetCurrentProcess','V','P').call()
-        Win32API.new('kernel32', 'SetPriorityClass', ['P', 'L'], 'B').call(proc_hndl, 0x40)
+        proc_hndl = Win32API.new('kernel32','GetCurrentProcess','V','L').call()
+        Win32API.new('kernel32', 'SetPriorityClass', ['L', 'L'], 'B').call(proc_hndl, 0x40)
     end
 elsif host =~ /linux/
     def GetDisksInfo
