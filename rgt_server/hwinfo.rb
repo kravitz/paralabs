@@ -2,7 +2,12 @@
 require 'rbconfig'
 #require 'pp'
 
-host = RbConfig::CONFIG["host_os"]
+def GetHost
+    RbConfig::CONFIG["host_os"]
+end
+
+host = GetHost()
+
 if host =~ /mingw/
     require 'win32/registry'
     require 'Win32API'
@@ -95,6 +100,10 @@ if host =~ /mingw/
         end
         disks_info
     end
+    def SetLowestPriority
+        proc_hndl = Win32API.new('kernel32','GetCurrentProcess','V','P').call()
+        Win32API.new('kernel32', 'SetPriorityClass', ['P', 'L'], 'B').call(proc_hndl, 0x40)
+    end
 elsif host =~ /linux/
     def GetDisksInfo
         filesystems = (`df -hlP -B 1M`).split("\n").map {|l| l.split(' ') }
@@ -127,6 +136,10 @@ elsif host =~ /linux/
             cpu_info[cpu_n] = File.new(cpu_dir + freq_suf).gets.chomp.to_f / 1000
         end
         cpu_info
+    end
+
+    def SetLowestPriority
+        Process.setpriority(Process::PRIO_PROCESS, 0, 19)
     end
 end
 

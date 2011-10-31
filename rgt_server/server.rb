@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 require 'socket'
-require './protocol'
+require_relative 'protocol'
 require 'json'
 require 'pp'
 
