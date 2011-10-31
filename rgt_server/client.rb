@@ -17,6 +17,9 @@ host, port = ARGV
 host, port = host.split ":" if port.nil?
 port = port.to_i
 
+# idle hack
+SetLowestPriority()
+
 begin
     socket = TCPSocket.new(host, port)
     mh = MessageHandler.new(socket)
