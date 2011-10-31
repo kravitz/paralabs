@@ -1,0 +1,6 @@
+source :rubygems
+source "http://rubygems.org"
+
+gem "progressbar"
+gem "json"
+gem "sys-cpu"
